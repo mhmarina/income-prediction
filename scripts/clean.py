@@ -1,7 +1,7 @@
 import pandas as pd
 
-outfile = "adult.data.clean.csv"
-infile = "adult.data.csv"
+outfile = "../data/adult.data.clean.csv"
+infile = "../data/adult.data.csv"
 
 df = pd.read_csv(infile, header=None, index_col=False)
 
