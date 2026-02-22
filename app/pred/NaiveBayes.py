@@ -18,43 +18,51 @@ class NaiveBayesClassifier:
         cont = continuous(d)
         y = target(d)
 
-        # fit GaussianNB model to continuous data
         g_X = np.column_stack(list(cont.values()))
-        gX_train, gX_test, Y_train, Y_test = train_test_split(g_X, y, random_state=42, test_size=0.2)
+        c_X = np.column_stack(list(cat.values())).astype(object)  
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            np.arange(len(y)), y, stratify=y, random_state=42, test_size=0.2
+        )
+
+        gX_train = g_X[X_train]
+        gX_test = g_X[X_test]
+        cX_train = c_X[X_train]
+        cX_test = c_X[X_test]
+        # fit GaussianNB model to continuous data
         self.gnb = GaussianNB()
-        self.gnb.fit(gX_train, Y_train)
         self.gnb_impute = SimpleImputer(strategy="mean")
         self.gnb_impute.fit(gX_train)
+        self.gnb.fit(gX_train, y_train)
 
         # fit CategoricalNB to categorical data
-        c_X = np.column_stack(list(cat.values())).astype(object)  
-        cX_train, cX_test, Y_train, Y_test = train_test_split(
-            c_X,
-            y,
-            stratify=y, # ensures each class is represented in test and train sets
-            random_state=42, test_size=0.2)  
         
         self.cnb = Pipeline([
             ('encoder', OrdinalEncoder()), # CategoricalNB does not accept string classes natively
             ('clf', CategoricalNB())
         ])
-        self.cnb.fit(cX_train, Y_train)
         self.cnb_impute = SimpleImputer(strategy="most_frequent")
         self.cnb_impute.fit(cX_train)
+        self.cnb.fit(cX_train, y_train)
 
         # accuracy
         Y_pred = self.predict(gX_test, cX_test)
-        self.accuracy = accuracy_score(Y_test, Y_pred)
-        self.precision = precision_score(Y_test, Y_pred, pos_label='>50K')
-        self.recall = recall_score(Y_test, Y_pred, pos_label='>50K')
+        self.accuracy = accuracy_score(y_test, Y_pred)
+        self.precision = precision_score(y_test, Y_pred, pos_label='>50K')
+        self.recall = recall_score(y_test, Y_pred, pos_label='>50K')
             
     def predict(self, cont_features, cat_features):
+        # enc = self.cnb.named_steps['encoder']
+        # for i, cats in enumerate(enc.categories_):
+        #     print(f"Feature {i}: {cats}")
+        # print(cat_features)
         cat_features = self.cnb_impute.transform(cat_features)
         cont_features = self.gnb_impute.transform(cont_features)
 
         cat_prb = self.cnb.predict_log_proba(cat_features)
         con_prb = self.gnb.predict_log_proba(cont_features)
         final_prb = con_prb + cat_prb
+
         return np.array(opt_y)[np.argmax(final_prb, axis=1)]
     
     def getMetrics(self):

@@ -14,22 +14,21 @@ class MyLogisticRegression():
     def train(self):
         d = data(self.datapath)
         c_X = np.column_stack(list(categorical(d).values())).astype(object) 
-
         self.cat_impute = SimpleImputer(strategy="most_frequent")
-        self.enc = OneHotEncoder()
         self.cat_impute.fit(c_X)
+        self.enc = OneHotEncoder()
         self.enc.fit(c_X)
         c_X = self.enc.transform(c_X).toarray()
 
         g_X = np.column_stack(list(continuous(d).values()))
+        self.scaler = StandardScaler()
+        self.scaler.fit(g_X)
+        g_X = self.scaler.transform(g_X)
         self.cont_impute = SimpleImputer(strategy="mean")
         self.cont_impute.fit(g_X)
-        y = target(d)
 
+        y = target(d)
         X = np.concatenate([c_X, g_X], axis=1)
-        self.scaler = StandardScaler()
-        self.scaler.fit(X)
-        X = self.scaler.transform(X)
 
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, stratify=y, random_state=42, test_size=0.2) 
@@ -45,10 +44,11 @@ class MyLogisticRegression():
 
     def predict(self, cont_features, cat_features):
         cat_features = self.cat_impute.transform(cat_features)
-        cont_features = self.cont_impute.transform(cont_features)
         cat_features = self.enc.transform(cat_features).toarray()
+        
+        cont_features = self.scaler.transform(cont_features)
+        cont_features = self.cont_impute.transform(cont_features)
         features = np.concatenate([cat_features, cont_features], axis=1)
-        self.scaler.transform(features)
         return self.model.predict(features)
 
     def getMetrics(self):
