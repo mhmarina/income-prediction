@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from data import data, target, continuous, categorical, opt_y
+from data import data, target, continuous, categorical
 
 class MyLogisticRegression():
     def __init__(self, datapath):
@@ -47,10 +47,16 @@ class MyLogisticRegression():
         cat_features = self.cat_impute.transform(cat_features)
         cont_features = self.cont_impute.transform(cont_features)
         cat_features = self.enc.transform(cat_features).toarray()
-
         features = np.concatenate([cat_features, cont_features], axis=1)
         self.scaler.transform(features)
         return self.model.predict(features)
+
+    def getMetrics(self):
+        print("---Logistic Regression Model---")
+        print(f"Accuracy: {self.accuracy}")
+        print(f"Precision: {self.precision}")
+        print(f"Recall: {self.recall}")
+
 
 def main():
     lr = MyLogisticRegression('../../data/adult.data.clean.csv')

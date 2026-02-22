@@ -57,6 +57,12 @@ class NaiveBayesClassifier:
         final_prb = con_prb + cat_prb
         return np.array(opt_y)[np.argmax(final_prb, axis=1)]
     
+    def getMetrics(self):
+        print("---Naive Bayes Classifier---")
+        print(f"Accuracy: {self.accuracy}")
+        print(f"Precision: {self.precision}")
+        print(f"Recall: {self.recall}")
+    
 def main():
     nc = NaiveBayesClassifier("../../data/adult.data.clean.csv")
 
