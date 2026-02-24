@@ -5,7 +5,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 import numpy as np
-from data import data, target, continuous, categorical, opt_y
+from .data import data, target, continuous, categorical, opt_y
 
 class NaiveBayesClassifier:
     def __init__(self, datapath):
@@ -24,11 +24,11 @@ class NaiveBayesClassifier:
         X_train, X_test, y_train, y_test = train_test_split(
             np.arange(len(y)), y, stratify=y, random_state=42, test_size=0.2
         )
-
         gX_train = g_X[X_train]
         gX_test = g_X[X_test]
         cX_train = c_X[X_train]
         cX_test = c_X[X_test]
+
         # fit GaussianNB model to continuous data
         self.gnb = GaussianNB()
         self.gnb_impute = SimpleImputer(strategy="mean")
@@ -36,7 +36,6 @@ class NaiveBayesClassifier:
         self.gnb.fit(gX_train, y_train)
 
         # fit CategoricalNB to categorical data
-        
         self.cnb = Pipeline([
             ('encoder', OrdinalEncoder()), # CategoricalNB does not accept string classes natively
             ('clf', CategoricalNB())

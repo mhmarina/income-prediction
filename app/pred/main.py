@@ -2,13 +2,11 @@ import argparse
 from LogisticRegression import MyLogisticRegression
 from NaiveBayes import NaiveBayesClassifier
 import numpy as np
-from data import opt_wc, opt_s, opt_ed, opt_nc, opt_o, opt_r, opt_rel, opt_ms, continuous, categorical, data
+from data import opt_wc, opt_s, opt_ed, opt_nc, opt_o, opt_r, opt_rel, opt_ms
 
 
 def main():
     datapath = '../../data/adult.data.clean.csv'
-    d = data(datapath)
-    features = list(continuous(d).keys()) + list(categorical(d).keys())
 
     # python main.py --help
     parser = argparse.ArgumentParser(description='Income Predictor')
@@ -57,28 +55,6 @@ def main():
         model = NaiveBayesClassifier(datapath)
     elif model_type in [ 'Logistic Regression', 'LR']:
         model = MyLogisticRegression(datapath)
-
-        # > 100 coefficients; one hot encoding expands the number of features
-        # ex: 'x0_Federal-gov' 'x0_Local-gov' 'x0_Private' 'x0_Self-emp-inc'
-        #  'x0_Self-emp-not-inc' 'x0_State-gov' 'x0_Without-pay' 'x1_10th' 'x1_11th'
-        # print(model.model.coef_)
-        # unwrap coefficients
-        coeff = [0,0,0,0,0,[],[],[],[],[],[],[],[]]
-        cat_names = model.enc.get_feature_names_out()
-        
-        # we can just use the first 5 continuous coefficients
-        for i in range(5):
-            coeff[i] = model.model.coef_[0][i]
-        for i in range(len(cat_names)):
-            ft_index = int(cat_names[i].split('_')[0][1])
-            val = model.model.coef_[0][i+5]
-            coeff[5+ft_index].append(val)
-        for i in range(5, len(coeff)):
-            coeff[i] = sum(coeff[i])/len(coeff[i])
-        
-        # for i in range(13):
-        #     # positive class is >50
-        #     print(f"{features[i]}: {coeff[i]}")
 
     print(model.predict([cont], [cat])[0])
     print(model.getMetrics())
