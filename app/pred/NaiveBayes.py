@@ -5,7 +5,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 import numpy as np
-from .data import data, target, continuous, categorical, opt_y
+from data import data, target, continuous, categorical, opt_y
 
 class NaiveBayesClassifier:
     def __init__(self, datapath):

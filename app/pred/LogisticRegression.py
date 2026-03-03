@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from .data import data, target, continuous, categorical
+from data import data, target, continuous, categorical
 
 class MyLogisticRegression():
     def __init__(self, datapath):
