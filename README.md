@@ -1,4 +1,7 @@
 The purpose of this project is to predict income for individuals using ML models and visualize the given dataset.
+```
+pip install -r requirements.txt
+```
 ```.
 ├── app
 │   ├── pred 
