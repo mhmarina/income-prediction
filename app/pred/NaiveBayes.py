@@ -109,12 +109,12 @@ class NaiveBayesClassifier:
 def main():
     nc = NaiveBayesClassifier("../../data/adult.data.clean.csv")
 
-    prd = nc.predict([[39, 13, 2174, 0, 40]], [['State-gov','Bachelors','Never-married','Adm-clerical', 'Not-in-family', 'White', 'Male', 'United-States']]) # <= 50
-    print(f"output: {prd}")
+    prd = nc.predict([[39, 13, 282023, 0, 56]], [['Private','Masters','Never-married','Adm-clerical', 'Not-in-family', 'White', 'Male', 'United-States']]) # <= 50
+    print(f"output: {prd}") #expect >50k
 
     # pass in missing values
     prd_impute = nc.predict([[39, np.nan, 2174, np.nan, 40]], [['State-gov',np.nan,'Never-married','Adm-clerical', np.nan, 'White', 'Male', np.nan]]) # <= 50
-    print(f"output with missing values: {prd_impute}")
+    print(f"output with missing values: {prd_impute}") #expect <=50k
 
 if __name__ == '__main__':
     main()
