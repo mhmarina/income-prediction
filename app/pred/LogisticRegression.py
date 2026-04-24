@@ -51,7 +51,7 @@ class MyLogisticRegression():
         features = np.concatenate([cat_features, cont_features], axis=1)
         return self.model.predict(features)
 
-    def getMetrics(self):
+    def printMetrics(self):
         print("---Logistic Regression Model---")
         print(f"Accuracy: {self.accuracy}")
         print(f"Precision: {self.precision}")
