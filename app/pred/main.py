@@ -57,7 +57,7 @@ def main():
         model = MyLogisticRegression(datapath)
 
     print(model.predict([cont], [cat])[0])
-    print(model.getMetrics())
+    model.printMetrics()
 
 if __name__ == '__main__':
     main()
