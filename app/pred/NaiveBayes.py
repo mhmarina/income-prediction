@@ -23,12 +23,15 @@ class NaiveBayesClassifier:
 
         if os.path.exists(self.root_pickle):
             print("Loading model...")
-            with open(self.pickle_cnb_path, "rb") as f:
-                self.cnb_obj = load(f)
-            with open(self.pickle_gnb_path, "rb") as f:
-                self.gnb_obj = load(f)
-            with open(self.pickle_stats_path, "rb") as f:
-                self.stats = load(f)
+            try:
+                with open(self.pickle_cnb_path, "rb") as f:
+                    self.cnb_obj = load(f)
+                with open(self.pickle_gnb_path, "rb") as f:
+                    self.gnb_obj = load(f)
+                with open(self.pickle_stats_path, "rb") as f:
+                    self.stats = load(f)
+            except:
+                self.train()
         else:
             print("Training model...")
             os.makedirs(self.root_pickle)

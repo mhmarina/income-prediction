@@ -5,27 +5,62 @@ from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from data import data, target, continuous, categorical
+from pickle import dump, load
+import os
+
 
 class MyLogisticRegression():
     def __init__(self, datapath):
         self.datapath = datapath
+        self.root_pickle = "pickle/LRC" #hehe
+        self.pickle_model_path = f"{self.root_pickle}/model.pkl"
+        self.pickle_cont_path = f"{self.root_pickle}/cont.pkl"
+        self.pickle_cat_path = f"{self.root_pickle}/cat.pkl"
+        self.pickle_stats_path = f"{self.root_pickle}/stats.pkl"
+
+        self.model = ""
+        self.cat_obj = {}
+        self.cont_obj = {}
+        self.stats = {}
+
+        if os.path.exists(self.root_pickle):
+            print("Loading model...")
+            try:
+                with open(self.pickle_model_path, "rb") as f:
+                    self.model = load(f)
+                with open(self.pickle_cat_path, "rb") as f:
+                    self.cat_obj = load(f)
+                with open(self.pickle_cont_path, "rb") as f:
+                    self.cont_obj = load(f)
+                with open(self.pickle_cont_path, "rb") as f:
+                    self.cont_obj = load(f)
+            except:
+                self.train()
+        else:
+            print("Training model...")
+            os.makedirs(self.root_pickle)
+            self.train()
         self.train()
     
     def train(self):
         d = data(self.datapath)
         c_X = np.column_stack(list(categorical(d).values())).astype(object) 
-        self.cat_impute = SimpleImputer(strategy="most_frequent")
-        self.cat_impute.fit(c_X)
-        self.enc = OneHotEncoder()
-        self.enc.fit(c_X)
-        c_X = self.enc.transform(c_X).toarray()
+        cat_impute = SimpleImputer(strategy="most_frequent")
+        cat_impute.fit(c_X)
+        enc = OneHotEncoder()
+        enc.fit(c_X)
+        c_X = enc.transform(c_X).toarray()
+        self.cat_obj["impute"] = cat_impute
+        self.cat_obj["enc"] = enc
 
         g_X = np.column_stack(list(continuous(d).values()))
-        self.scaler = StandardScaler()
-        self.scaler.fit(g_X)
-        g_X = self.scaler.transform(g_X)
-        self.cont_impute = SimpleImputer(strategy="mean")
-        self.cont_impute.fit(g_X)
+        scaler = StandardScaler()
+        scaler.fit(g_X)
+        g_X = scaler.transform(g_X)
+        cont_impute = SimpleImputer(strategy="mean")
+        cont_impute.fit(g_X)
+        self.cont_obj["scaler"] = scaler
+        self.cont_obj["impute"] = cont_impute
 
         y = target(d)
         X = np.concatenate([c_X, g_X], axis=1)
@@ -38,24 +73,34 @@ class MyLogisticRegression():
         y_pred = self.model.predict(X_test)
 
         # evaluate
-        self.accuracy = accuracy_score(y_test, y_pred)
-        self.precision = precision_score(y_test, y_pred, pos_label='>50K')
-        self.recall = recall_score(y_test, y_pred, pos_label='>50K')
+        self.stats["accuracy"] = accuracy_score(y_test, y_pred)
+        self.stats["precision"] = precision_score(y_test, y_pred, pos_label='>50K')
+        self.stats["recall"] = recall_score(y_test, y_pred, pos_label='>50K')
+
+        #pickle:
+        with open(self.pickle_model_path, "wb") as f:
+            dump(self.model, f, protocol=5)
+        with open(self.pickle_cat_path, "wb") as f:
+            dump(self.cat_obj, f, protocol=5)
+        with open(self.pickle_cont_path, "wb") as f:
+            dump(self.cont_obj, f, protocol=5)
+        with open(self.pickle_stats_path, "wb") as f:
+            dump(self.stats, f, protocol=5)        
 
     def predict(self, cont_features, cat_features):
-        cat_features = self.cat_impute.transform(cat_features)
-        cat_features = self.enc.transform(cat_features).toarray()
+        cat_features = self.cat_obj["impute"].transform(cat_features)
+        cat_features = self.cat_obj["enc"].transform(cat_features).toarray()
         
-        cont_features = self.scaler.transform(cont_features)
-        cont_features = self.cont_impute.transform(cont_features)
+        cont_features = self.cont_obj["scaler"].transform(cont_features)
+        cont_features = self.cont_obj["impute"].transform(cont_features)
         features = np.concatenate([cat_features, cont_features], axis=1)
         return self.model.predict(features)
 
     def printMetrics(self):
         print("---Logistic Regression Model---")
-        print(f"Accuracy: {self.accuracy}")
-        print(f"Precision: {self.precision}")
-        print(f"Recall: {self.recall}")
+        print(f"Accuracy: {self.stats["accuracy"]}")
+        print(f"Precision: {self.stats["precision"]}")
+        print(f"Recall: {self.stats["recall"]}")
 
 
 def main():
